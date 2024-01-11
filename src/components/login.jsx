@@ -30,12 +30,12 @@ const Login = () => {
             <main >        
                 <section>
                     <div>                                            
-                        <p> FocusApp </p>                       
+                        <h1> Hello! Let's LogIn </h1>                       
                                                        
                         <form>                                              
                             <div>
                                 <label htmlFor="email-address">
-                                    Email address
+                                    <strong><i>Email address</i></strong>
                                 </label>
                                 <input
                                     id="email-address"
@@ -49,7 +49,7 @@ const Login = () => {
 
                             <div>
                                 <label htmlFor="password">
-                                    Password
+                                <strong><i>Password</i></strong>
                                 </label>
                                 <input
                                     id="password"
@@ -65,7 +65,7 @@ const Login = () => {
                                 <button                                    
                                     onClick={onLogin}                                        
                                 >      
-                                    Login                                                                  
+                                    <b>Login</b>                                                                
                                 </button>
                             </div>                               
                         </form>
@@ -73,7 +73,7 @@ const Login = () => {
                         <p className="text-sm text-white text-center">
                             No account yet? {' '}
                             <NavLink to="/signup">
-                                Sign up
+                               <b>Sign up</b>
                             </NavLink>
                         </p>
                                                    

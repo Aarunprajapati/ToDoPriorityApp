@@ -1,70 +1,349 @@
-# Getting Started with Create React App
+import React, { useState } from "react";
+import { useDrag, useDrop, DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { doc, collection, addDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+const TodoList = () => {
+  const [tasks, setTasks] = useState([]);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskPriority, setTaskPriority] = useState("");
 
-## Available Scripts
+  const addTask = async () => {
+    if (taskTitle && taskDescription && taskDueDate && taskPriority) {
+      try {
+        const taskRef = await addDoc(collection(db, "tasks"), {
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate,
+          priority: taskPriority,
+        });
 
-In the project directory, you can run:
+        const newTask = {
+          id: taskRef.id,
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate,
+          priority: taskPriority,
+        };
+        setTasks([...tasks, newTask]);
+      } catch (error) {
+        console.error("Error adding task to Firestore:", error);
+      }
 
-### `npm start`
+      // Clear input fields after adding a task
+      setTaskTitle("");
+      setTaskDescription("");
+      setTaskDueDate("");
+      setTaskPriority("");
+    } else {
+      alert("Please fill in all task details.");
+    }
+  };
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+  const removeTask = async (taskId) => {
+    try {
+      await deleteDoc(doc(db, "tasks", taskId));
+      
+      const updatedTasks = tasks.filter((task) => task.id !== taskId);
+      setTasks(updatedTasks);
+      console.log("Document successfully deleted from db with id: ", taskId);
+    } catch (error) {
+      console.error("Error removing task from Firestore:", error);
+    }
+  };
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  const moveTask = (dragIndex, hoverIndex, dragBlock, hoverBlock) => {
+    // Implement logic to update the task order in your state
+    // You may need to consider different blocks as well
+    // Update the tasks state accordingly
+  };
 
-### `npm test`
+  const Task = ({ task, index, moveTask, block }) => {
+    const [{ isDragging }, drag] = useDrag({
+      type: "TASK",
+      item: { index, block },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    });
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    const getTaskStyle = (isDragging) => ({
+      cursor: "move",
+      opacity: isDragging ? 0.5 : 1,
+    });
 
-### `npm run build`
+    const [, drop] = useDrop({
+      accept: "TASK",
+      hover: (draggedItem) => {
+        moveTask(draggedItem.index, index, draggedItem.block, block);
+        draggedItem.index = index;
+        draggedItem.block = block;
+      },
+    });
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    return (
+      <div ref={(node) => drag(drop(node))} style={getTaskStyle(isDragging)}>
+        <li>
+          <strong>{task.title}</strong>
+          <p>{task.description}</p>
+          <p>Due Date: {task.dueDate}</p>
+          <p>Priority: {task.priority}</p>
+          <button onClick={() => removeTask(task.id)}>Delete</button>
+        </li>
+      </div>
+    );
+  };
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div>
+        <h1>Todo List</h1>
+        <div>
+          <label>Title:</label>
+          <input
+            type="text"
+            value={taskTitle}
+            onChange={(e) => setTaskTitle(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Description:</label>
+          <input
+            type="text"
+            value={taskDescription}
+            onChange={(e) => setTaskDescription(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Due Date:</label>
+          <input
+            type="date"
+            value={taskDueDate}
+            onChange={(e) => setTaskDueDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Priority:</label>
+          <select
+            value={taskPriority}
+            onChange={(e) => setTaskPriority(e.target.value)}
+          >
+            <option value="">Select Priority</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button onClick={addTask}>Add Task</button>
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+        <ul>
+          {tasks.map((task, index) => (
+            <Task key={index} task={task} index={index} moveTask={moveTask} />
+          ))}
+        </ul>
+      </div>
+    </DndProvider>
+  );
+};
 
-### `npm run eject`
+export default TodoList;
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+/////////////////////////////////
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+import React, { useState } from "react";
+import { useDrag, useDrop, DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+import { doc, collection, addDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
-### Analyzing the Bundle Size
+const TodoList = () => {
+  const [tasks, setTasks] = useState({
+    High: [""],
+    Medium: [""],
+    Low: [""],
+  });
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskPriority, setTaskPriority] = useState("");
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+  const addTask = async () => {
+    if (taskTitle && taskDescription && taskDueDate && taskPriority) {
+      try {
+        const taskRef = await addDoc(collection(db, "tasks"), {
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate,
+          priority: taskPriority,
+        });
 
-### Making a Progressive Web App
+        const newTask = {
+          id: taskRef.id,
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate,
+          priority: taskPriority,
+        };
+        setTasks([...tasks, newTask]);
+      } catch (error) {
+        console.error("Error adding task to Firestore:", error);
+      }
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+      // Clear input fields after adding a task
+      setTaskTitle("");
+      setTaskDescription("");
+      setTaskDueDate("");
+      setTaskPriority("");
+    } else {
+      alert("Please fill in all task details.");
+    }
+  };
 
-### Advanced Configuration
+  const removeTask = async (taskId) => {
+    try {
+      await deleteDoc(doc(db, "tasks", taskId));
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+      const updatedTasks = tasks.filter((task) => task.id !== taskId);
+      setTasks(updatedTasks);
+      console.log("Document successfully deleted from db with id: ", taskId);
+    } catch (error) {
+      console.error("Error removing task from Firestore:", error);
+    }
+  };
 
-### Deployment
+  const moveTask = (dragIndex, hoverIndex, dragBlock, hoverBlock) => {
+    // Make a copy of the current state
+    const updatedTasks = { ...tasks };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    // Get the task that is being dragged
+    const taskToMove = updatedTasks[dragBlock][dragIndex];
 
-### `npm run build` fails to minify
+    // Remove the task from the source block
+    updatedTasks[dragBlock].splice(dragIndex, 1);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    // Add the task to the destination block at the appropriate index
+    updatedTasks[hoverBlock].splice(hoverIndex, 0, taskToMove);
+
+    // Update the state with the new task order
+    setTasks(updatedTasks);
+  };
+
+  const Task = ({ task, index, moveTask, block }) => {
+    const [{ isDragging }, drag] = useDrag({
+      type: "TASK",
+      item: { index, block },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    });
+  
+    const getTaskStyle = (isDragging) => ({
+      cursor: "move",
+      opacity: isDragging ? 0.5 : 1,
+    });
+  
+    const [, drop] = useDrop({
+      accept: "TASK",
+      hover: (item) => {
+        if (item.block !== block) {
+          moveTask(item.index, index, item.block, block);
+          item.index = index;
+          item.block = block;
+        }
+      },
+    });
+  
+    return (
+      <div ref={(node) => drag(drop(node))} style={getTaskStyle(isDragging)}>
+        <li>
+          <strong>{task.title}</strong>
+          <p>{task.description}</p>
+          <p>Due Date: {task.dueDate}</p>
+          <p>Priority: {task.priority}</p>
+          <button onClick={() => removeTask(task.id)}>Delete</button>
+        </li>
+      </div>
+    );
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div>
+        <h1>Todo List</h1>
+        <div>
+          <label>Title:</label>
+          <input
+            type="text"
+            value={taskTitle}
+            onChange={(e) => setTaskTitle(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Description:</label>
+          <input
+            type="text"
+            value={taskDescription}
+            onChange={(e) => setTaskDescription(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Due Date:</label>
+          <input
+            type="date"
+            value={taskDueDate}
+            onChange={(e) => setTaskDueDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Priority:</label>
+          <select
+            value={taskPriority}
+            onChange={(e) => setTaskPriority(e.target.value)}
+          >
+            <option value="">Select Priority</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button onClick={addTask}>Add Task</button>
+         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+          {Object.keys(tasks).map((block) => (
+            <div key={block} style={{ flex: 1 }}>
+              <h2>{block}</h2>
+              {tasks[block].map((task, index) => (
+                <Task
+                  key={index}
+                  task={task}
+                  index={index}
+                  moveTask={moveTask}
+                  block={block}
+                />
+              ))}
+            </div>
+          ))}
+         </div>
+      </div>
+    </DndProvider>
+  );
+};
+
+export default TodoList;
+
+
+///////////////////////////////
+
+
+
+
+

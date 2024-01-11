@@ -1,79 +1,93 @@
 body {
-  font-family: Drukaatie Burti, Canva Sans;
-  background-color: #f8f7f2;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #858282;
 }
 
-.App {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+nav {
+  background-color: lightslategray;
+  color: #fff;
+  padding: 10px;
 }
 
 h1 {
-  margin-bottom: 20px;
+  color: #FEE715;
+}
+
+div {
+  background-color: #89ABE3 ;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.726);
 }
 
 label {
   display: block;
   margin-bottom: 5px;
+  color: black;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 10px;
-  margin-bottom: 20px;
-  background-color: #c3a27f;
-  border-radius: 15%;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  background-color: #CBD18F;
+}
+
+select {
+  cursor: pointer;
 }
 
 button {
-  background-color: black;
-  color: white;
-  padding: 10px 20px;
+  background-color: #2ecc71;
+  color: #fff;
   border: none;
+  padding: 10px;
+  border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 20px;
 }
 
 button:hover {
-  background-color: rosybrown;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
+  background-color: #27ae60;
 }
 
 li {
-  background-color: #f8f9fa;
+  list-style: none;
+  border: 1px solid #ddd;
+  margin: 5px 0;
   padding: 10px;
-  margin-bottom: 10px;
   border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+li p {
+  margin: 5px 0;
+  color: #555;
 }
 
 li button {
-  background-color: #f44336;
-  color: white;
-  padding: 5px 10px;
+  background-color: #e74c3c;
+  color: #fff;
   border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
   cursor: pointer;
-  margin-left: 10px;
 }
 
 li button:hover {
-  background-color: #e53935;
+  background-color: #c0392b;
 }
 
-
-.column {
-  float: left;
-  width: 50%;
+.border { 
+  margin: 20px;
+  padding: 20px;
+  background-color: #EA738D;
+  border-radius: 5px;
+  box-shadow: 0 0 10px;
 }
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
+.border text {
+  background-color: rgba(0, 0, 0, 0.1);
 }
