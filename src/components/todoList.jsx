@@ -66,33 +66,51 @@ const TodoList = () => {
         };
 
         // Find the block in blockArray that matches the task's priority
-        const blockToUpdate = blockArray.find(
-          (block) => block.title === taskPriority
-        );
+        // const blockToUpdate = blockArray.find(
+        //   (block) => block.title === taskPriority
+        // );
 
-        if (blockToUpdate) {
-          // Update the state of the specific block with the new task
-          setBlockArray((prevBlockArray) => {
-            const updatedBlockArray = [...prevBlockArray];
-            const updatedBlockIndex = updatedBlockArray.indexOf(blockToUpdate);
+        // console.log(blockArray);
 
-            if (updatedBlockIndex !== -1) {
-              updatedBlockArray[updatedBlockIndex].cards.push(newTask);
-            }
+        const updatedBlockArray = blockArray.map((block) => {
+          console.log(block)
+          if (block.title === list) {
+            return {
+              ...block,
+              cards: [...block.cards, newTask],
+            };
+          }
+          return block;
+        });
 
-            return updatedBlockArray;
-          });
-        }
+        setBlockArray(updatedBlockArray);
+
+        //  if (blockToUpdate) {
+        //  //Update the state of the specific block with the new task
+        //    setBlockArray((prevBlockArray) => {
+        //      const updatedBlockArray = [...prevBlockArray];
+        //      const updatedBlockIndex = updatedBlockArray.findIndex(
+        //       (block) => block.title === list
+        //     );
+        //      if (updatedBlockIndex !== -1) {
+        //        updatedBlockArray[updatedBlockIndex].cards.push(newTask);
+        //      }
+        //      return updatedBlockArray;
+        //    });
+        //  }
+
+        //
         // Update the state based on the priority level
-        setTasks((prevTasks) => ({
-          ...prevTasks,
-          [taskPriority]: [...prevTasks[taskPriority], newTask],
-        }));
+        // setTasks((prevTasks) => ({
+        //   ...prevTasks,
+        //   [taskPriority]: [...prevTasks[taskPriority], newTask],
+        // }));
       } catch (error) {
         console.error("Error adding task to Firestore:", error);
       }
 
       // Clear input fields after adding a task
+      setList("");
       setTaskTitle("");
       setTaskDescription("");
       setTaskDueDate("");
@@ -286,61 +304,84 @@ const TodoList = () => {
         >
           <b>Add Task</b>
         </button>
-        <div style={{ display: "flex", justifyContent: "space-around" }}>
-            {blockArray.map((block) => (
-              <div key={block.id}>
-                <h2>List: {block.title}</h2>
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            minWidth: '300px',
+        
+          }}
+        >
+          {Object.keys(tasks).map((block) => {
+            return (
+              <div
+                key={block}
+                style={{
+                  marginBottom: "20px",
+                  overflow:"hidden",
+                  width: "300px",
+                 
+                }}
+              >
+                <h2>{block}</h2>
                 <ul>
-                  {block.cards.map((task, index) => (
+                  {tasks[block].map((task, index) => (
                     <Task
                       key={index}
                       task={task}
                       index={index}
                       moveTask={moveTask}
-                      block={block.title}
+                      block={block}
                     />
                   ))}
                 </ul>
               </div>
-            ))}
-          {Object.keys(tasks).map((block) => (
-            <div key={block} style={{ marginBottom: "20px", flex: 1 }}>
-              <h2>{block}</h2>
+            );
+          })}
+
+          {blockArray.map((block) => (
+            <div key={block.id} 
+            style={{
+              marginBottom: "20px",
+              overflow:"hidden",
+              width: "300px",
+            }}>
+              <h2>List: {block.title}</h2>
               <ul>
-                {tasks[block].map((task, index) => (
+                {block.cards.map((task, index) => (
                   <Task
                     key={index}
                     task={task}
                     index={index}
                     moveTask={moveTask}
-                    block={block}
+                    block={block.title}
                   />
                 ))}
               </ul>
             </div>
           ))}
         </div>
-        <div>
-          {/* Logout button */}
-          <nav style={{ color: "#fff", padding: "10px", textAlign: "center" }}>
-            <div>
-              <button
-                style={{
-                  backgroundColor: "#e74c3c",
-                  color: "#fff",
-                  padding: "10px 15px",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  fontSize: "1em",
-                }}
-                onClick={handleLogout}
-              >
-                LogOut
-              </button>
-            </div>
-          </nav>
-        </div>
+
+        {/* Logout button */}
+        <nav style={{ color: "#fff", padding: "10px", textAlign: "center" }}>
+          <div>
+            <button
+              style={{
+                backgroundColor: "#e74c3c",
+                color: "#fff",
+                padding: "10px 15px",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontSize: "1em",
+              }}
+              onClick={handleLogout}
+            >
+              LogOut
+            </button>
+          </div>
+        </nav>
       </div>
     </DndProvider>
   );
